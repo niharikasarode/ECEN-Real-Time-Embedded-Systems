@@ -4,9 +4,10 @@
 #include <time.h>
 
 #define update_arg 12.34567
+#define Thread_1 1
+#define Thread_2 2
 
-void *thread_update();
-void *thread_read();
+void *thread_update(void *threadid);
 
 int i;
 
@@ -27,9 +28,12 @@ Space_Param1 Space_Param;
 
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 
-void *thread_update()
+void *thread_update(void *threadid)
 {
-        int result;
+     if((int)threadid == Thread_1)
+	{
+	printf("Thread 1 is updating");
+	 int result;
         Space_Param1 Space_Param_Update;
 
         Space_Param_Update.X_acc = update_arg;
@@ -61,10 +65,10 @@ void *thread_update()
         */
         pthread_mutex_unlock(&mutex1);
 
-}
+	}
 
-void *thread_read()
-{
+  else{ 
+	printf("Thread 2 is reading");
 
         Space_Param1 Space_Param_Read;
         int result;
@@ -88,9 +92,9 @@ void *thread_read()
         pthread_mutex_unlock(&mutex1);
 
 
+	}
+
 }
-
-
 
 
 
@@ -106,23 +110,21 @@ int main()
                 perror("mutex_init error");
         }
 
-        for(i=0; i<3; i++)
-        {
+        
 
-                if((rc1=pthread_create(&thread1, NULL, &thread_update, NULL)) != 0 )
+                if((rc1=pthread_create(&thread1, NULL, &thread_update, (void *)Thread_1)) != 0 )
                 {
                         perror("thread1_create error");
                 }
-
+	usleep(10000);
         	usleep(100000);
-                if((rc2=pthread_create(&thread2, NULL, &thread_read, NULL)) != 0 )
+                if((rc2=pthread_create(&thread2, NULL, &thread_update, (void*)Thread_2)) != 0 )
                 {
                         perror("thread1_create error");
                 }
-        }
+        
         usleep(100000);
         pthread_join( thread1, NULL);
         pthread_join( thread2, NULL);
 
 }
-
