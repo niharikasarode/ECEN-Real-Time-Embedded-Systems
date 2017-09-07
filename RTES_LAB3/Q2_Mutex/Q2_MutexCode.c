@@ -114,6 +114,7 @@ int main()
                         perror("thread1_create error");
                 }
 
+        	usleep(100000);
                 if((rc2=pthread_create(&thread2, NULL, &thread_read, NULL)) != 0 )
                 {
                         perror("thread1_create error");
