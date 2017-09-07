@@ -72,10 +72,10 @@ void *thread_read()
         pthread_mutex_lock(&mutex1);
 
         Space_Param_Read = Space_Param;
-        if( i == 1)
-        {
+     
+        
         printf (" R1 X : %lf, Y : %lf , Z : %lf, Roll : %lf,Pitch : %lf, Yaw : %lf.\n", Space_Param_Read.X_acc, Space_Param_Read.Y_acc, Space_Param_Read.Z_acc, Space_Param_Read.Roll,Space_Param_Read.Pitch, Space_Param_Read.Yaw);
-        }
+        
         result = clock_gettime(CLOCK_REALTIME, &Space_Param_Read.Sample_time);
         if(result != 0)
         perror("getclock");
