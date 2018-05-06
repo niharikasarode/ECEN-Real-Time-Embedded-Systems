@@ -35,6 +35,8 @@ void *cvthread(void*)
 {
 	while(1)
 	{
+	
+	sem_wait(&cv_sem);
 	sem_wait(&update_sem);
 	sem_wait(&display_sem);
 	printf("Into CV thread now\n");
@@ -45,7 +47,7 @@ void *updatethread(void*)
 {
 	while(1)
 	{
-	sem_wait(&cv_sem);
+	sem_wait(&update_sem);
 	printf("in update thread now\n");
 	sem_post(&display_sem);
 	}
@@ -54,8 +56,10 @@ void *dispthread(void*)
 {
 	while(1)
 	{
-	sem_wait(&update_sem);
+	sem_wait(&display_sem);
 	printf("In disp thread now\n");
+	sem_post(&cv_sem);
+	sem_post(&cv_sem);
 	sem_post(&cv_sem);
 	}
 }
@@ -97,9 +101,9 @@ int main(int argc, char **argv)
 	update_param.sched_priority = max_prio-2;
 	disp_param.sched_priority = max_prio-3;
 
-	sem_init(&cv_sem, 0 , 1);
-	sem_init(&update_sem, 0, 0);
-	sem_init(&display_sem, 0, 0);
+	sem_init(&cv_sem, 0 , 0);
+	sem_init(&update_sem, 0, 1);
+	sem_init(&display_sem, 0, 1);
 
 	int rc = sched_setscheduler(getpid(), SCHED_FIFO, &main_param);
 	if(rc)
@@ -114,7 +118,6 @@ int main(int argc, char **argv)
 	pthread_attr_setschedparam(&disp_attr, &disp_param);
 	pthread_attr_setschedparam(&main_attr, &main_param);
 
-	sem_post(&cv_sem);
 
 	if(pthread_create(&cv_thread, &cv_attr, cvthread, (void *)0))
 	{
@@ -137,6 +140,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	
+	sem_post(&cv_sem);
 	pthread_join(cv_thread, NULL);
 	pthread_join(update_thread, NULL);
 	pthread_join(disp_thread, NULL);
